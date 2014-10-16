@@ -7,22 +7,23 @@ import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PojoGen {
 
     private Writer writer;
 
     public static void main(String[] args) {
-    	final PojoGen pojoGen = new PojoGen();
-    	
-    	final Map<String, String> sodaFields = new LinkedHashMap<>();
+        final PojoGen pojoGen = new PojoGen();
+
+        final Map<String, String> sodaFields = new LinkedHashMap<>();
         sodaFields.put("name", "String");
         sodaFields.put("calories", "int");
         sodaFields.put("diet", "boolean");
         sodaFields.put("color", "Color");
-		final Pair<String, String> colorEnum = new Pair<>("Color", "Brown,Clear,Orange,RedBrown,Yellow");
-		pojoGen.genClass("Soda", sodaFields, colorEnum);
-        
+        final Pair<String, String> colorEnum = new Pair<>("Color", "Brown,Clear,Orange,RedBrown,Yellow");
+        pojoGen.genClass("Soda", sodaFields, colorEnum);
+
         final Map<String, String> humanFields = new LinkedHashMap<>();
         humanFields.put("firstName", "String");
         humanFields.put("lastName", "String");
@@ -31,17 +32,17 @@ public class PojoGen {
         humanFields.put("gender", "Gender");
         final Pair<String, String> BloodEnum = new Pair<>("BloodType", "AB,A,B,O,UNKNOWN");
         final Pair<String, String> GenderEnum = new Pair<>("Gender", "MALE,FEMALE,UNKNOWN");
-        pojoGen.genClass("Human", humanFields, BloodEnum, GenderEnum);      
+        pojoGen.genClass("Human", humanFields, BloodEnum, GenderEnum);
     }
 
     @SafeVarargs
-	final public void genClass(
+    final public void genClass(
             final String className,
             final Map<String, String> fields,
             final Pair<String, String>... pairs) {
-    	genClass(className, "sora.havok.generated", fields, pairs);
+        genClass(className, "sora.havok.generated", fields, pairs);
     }
-    
+
     @SafeVarargs
     final public void genClass(
             final String className,
@@ -57,9 +58,7 @@ public class PojoGen {
             createConstructor(className, fields);
             createGetters(fields);
             createToString(className, fields);
-            for(final Pair<String, String> pair : pairs) {
-                createEnum(pair.first, pair.second);
-            }
+            Stream.of(pairs).forEach(pair -> createEnum(pair.first, pair.second));
             write("}");
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,7 +93,7 @@ public class PojoGen {
     }
 
     private void createFields(final Map<String, String> fields) {
-        fields.entrySet().forEach((e) -> write("private final "+e.getValue() + " " + e.getKey()+";"));
+        fields.entrySet().forEach(field -> write("private final "+field.getValue() + " " + field.getKey()+";"));
     }
 
     private void createConstructor(final String className, final Map<String, String> fields) {
@@ -117,5 +116,4 @@ public class PojoGen {
             e.printStackTrace();
         }
     }
-
 }
